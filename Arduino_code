@@ -1,0 +1,111 @@
+ #include<SoftwareSerial.h>
+int IR1 = 12;
+int buzzer=7;
+int IR2=13;
+int LDR=A2;
+int Flame=A0;
+int touch=9;
+const String PHONE="+919328282051";
+#define RXPIN 2
+#define TXPIN 3 
+SoftwareSerial mySerial(3, 2);
+void setup() 
+{
+  mySerial.begin(9600);
+  Serial.begin(9600);
+  Serial.println("Initializing...");
+
+  mySerial.println("AT");                 // Sends an ATTENTION command, reply should be OK
+  mySerial.println("AT+CMGF=1");          // Configuration for sending SMS
+  mySerial.println("AT+CNMI=1,2,0,0,0");  // Configuration for receiving SMS
+  
+  pinMode(IR1,INPUT); 
+  pinMode(IR2,INPUT);
+  pinMode(LDR,INPUT);
+  pinMode(Flame,INPUT);
+  pinMode(touch,INPUT);
+  pinMode(buzzer,OUTPUT);
+}
+
+void loop() 
+{
+  while(mySerial.available()){
+    Serial.println(mySerial.readString());
+   }
+  while(Serial.available())  {
+    mySerial.println(Serial.readString());
+  }
+  int IR1out = digitalRead(IR1);
+  int IR2out = digitalRead(IR2);
+  int LDRout = analogRead(LDR);
+  int Flameout = analogRead(Flame);
+  int touchout = digitalRead(touch);
+  
+  delay(1000); //Detection time if <1000 buzzer dont work
+  Serial.print("IR1 value = ");
+  Serial.print(IR1out);
+  Serial.println();
+  delay(500);
+  
+  Serial.print("IR2 value = ");
+  Serial.print(IR2out);
+  Serial.println();
+  delay(500);
+  
+  Serial.print("LDR value = ");
+  Serial.print(LDRout);
+  Serial.println();
+  delay(500);
+  
+  Serial.print("Flame value = ");
+  Serial.print(Flameout);
+  Serial.println();
+  delay(500);
+  
+  Serial.print("Touch value = ");
+  Serial.print(touchout);
+  Serial.println();
+  
+  if(IR1out==0)
+  {
+    if(IR2out==0)
+    {
+       delay(1000);
+        mySerial.println("AT+CMGF=1");
+        delay(500);
+        mySerial.println("AT+CMGS=\"+919328282051\"\r");
+        delay(500);
+        mySerial.print("Alert!! Suspicious Activity Detected !!!");
+        delay(500);
+        mySerial.write(26);
+        
+        digitalWrite(buzzer,HIGH);
+    }
+    else
+    {
+    digitalWrite(buzzer,LOW);
+    } 
+  }
+  else if(touchout==1)
+  {
+    digitalWrite(buzzer,HIGH);
+  }
+  else if(Flameout<=100)// && Flameout>=35
+  {
+    digitalWrite(buzzer,HIGH);
+  }
+  else if(LDRout<=70)// && >=7
+  {
+    Serial.println("Motion detected!");
+    Serial.println("Calling....");
+    delay(1000);
+    mySerial.println("ATD"+PHONE+";");
+    delay(20000);//20sec
+    mySerial.println("ATH");
+    digitalWrite(buzzer,HIGH);
+  }
+  else
+  {
+    digitalWrite(buzzer,LOW);
+  }
+}
