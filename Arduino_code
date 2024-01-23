@@ -5,7 +5,7 @@ int IR2=13;
 int LDR=A2;
 int Flame=A0;
 int touch=9;
-const String PHONE="+919328282051";
+const String PHONE="+91XXXXXXXXXX";
 #define RXPIN 2
 #define TXPIN 3 
 SoftwareSerial mySerial(3, 2);
@@ -73,7 +73,7 @@ void loop()
        delay(1000);
         mySerial.println("AT+CMGF=1");
         delay(500);
-        mySerial.println("AT+CMGS=\"+919328282051\"\r");
+        mySerial.println("AT+CMGS=\"+91XXXXXXXXXX\"\r");
         delay(500);
         mySerial.print("Alert!! Suspicious Activity Detected !!!");
         delay(500);
